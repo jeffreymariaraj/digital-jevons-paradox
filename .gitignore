@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+*.egg-info/
+
+# Run logs are timestamped and can be regenerated; cite retrieval dates
+# from the RETRIEVED lines you copy into Methods, not from raw log files.
+logs/*.log
+
+# Notebook checkpoints
+.ipynb_checkpoints/
