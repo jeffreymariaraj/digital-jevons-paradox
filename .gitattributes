@@ -2,3 +2,6 @@ data/raw/**/*.csv filter=lfs diff=lfs merge=lfs -text
 data/raw/**/*.parquet filter=lfs diff=lfs merge=lfs -text
 data/raw/**/*.json filter=lfs diff=lfs merge=lfs -text
 data/processed/**/*.parquet filter=lfs diff=lfs merge=lfs -text
+
+# Hand-curated, fully-sourced, small: keep as plain diffable text, not LFS.
+data/raw/frontier_price_panel.csv -filter -diff -merge text
