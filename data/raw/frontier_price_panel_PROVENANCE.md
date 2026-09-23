@@ -79,6 +79,30 @@ day. Price from a same-day archived pricing-page snapshot, model id
 model card addendum PDF. Price quoted directly from the (static) announcement
 page.
 
+**Llama 3.1 405B Instruct (Jul 2024) — added to fill the Jun–Dec 2024 gap.**
+Per Jeff's instruction, benchmark scores come from the DeepSeek-V3 paper's
+Table 6 (arXiv:2412.19437) rather than Meta's own announcement, specifically
+for consistency with the crosswalk-check methodology: MMLU (EM) 88.6, GPQA
+Diamond (Pass@1) 51.1, shot count not stated in that table (same caveat as
+the DeepSeek-V3/R1 rows sourced from the same table). Cross-checked against
+Meta's own announcement, which independently reports 87.3% (5-shot, no CoT)
+and 88.6% (5-shot CoT) — the DeepSeek-table figure matches Meta's own CoT
+number exactly, a reassuring (if unexplained) coincidence given DeepSeek's
+table doesn't itself state whether CoT was used.
+
+Price is the first genuinely open-weight model in the panel — Meta doesn't
+sell inference itself, so there's no single "the price." Sourced from
+Together AI's serverless pricing page, archived 2 days after release (the
+earliest snapshot available; Fireworks AI was also checked as a
+cross-reference but its pricing table loads via client-side JS not present
+in the archived HTML, so wasn't usable). Together's own page states
+explicitly: "Prices are per 1 million tokens including input and output
+tokens" — i.e. a **single blended rate ($5.00/M, "Turbo" tier)**, not
+separate input/output prices. $5.00 is recorded in both price columns for
+schema consistency, but there is no real input:output split to
+sensitivity-test for this row, unlike every lab-served row in the panel.
+See "Decisions made" below for how to handle this going forward.
+
 **o1 (Dec 2024).** MMLU 92.3% (0-shot, English/non-translated row) from
 Table 17 of OpenAI's own o1 System Card PDF — o1's primary materials report
 MMLU via a multilingual-robustness table rather than a headline capability
@@ -94,15 +118,14 @@ technical report (arXiv:2412.19437). This same table also reports GPQA
 Diamond (Pass@1) = 59.1 for V3, alongside 6 other contemporary models
 evaluated under identical methodology — recorded as the secondary
 benchmark, and this table turned out to be the key evidence for the
-MMLU/GPQA crosswalk check (see "Decisions made"). Price confirmed via a
-same-day archived snapshot of DeepSeek's pricing docs — but the source page
-itself states this is a **discounted/promotional** cache-miss price in
-effect only through 2025-02-08 16:00 UTC, after which the standard list
-price ($0.27/M in, $1.10/M out) took over automatically. Recorded the
-promotional at-launch price since that is literally what was true "at
-release," per Jeff's instruction to record price as announced at release —
-flagging prominently since it's materially different from the standard
-price.
+MMLU/GPQA crosswalk check (see "Decisions made"). Price: **updated** to use
+DeepSeek's own **standard/list price** ($0.27/M input cache-miss, $1.10/M
+output), not the launch-day promotional price ($0.14/$0.28) originally
+recorded — see "Decisions made" for why. Both figures are on the exact same
+already-cited archived page/snapshot, stated directly in USD by DeepSeek
+themselves (the page also shows the same figures in RMB; no currency
+conversion was needed or performed). The promotional price was in effect
+only through 2025-02-08 16:00 UTC.
 
 **DeepSeek-R1 (Jan 2025, mandatory).** MMLU 90.8 (EM) from Table 3 of the
 official paper (arXiv:2501.12948) — the fork that found this cited it as
@@ -167,7 +190,11 @@ column.
 **DeepSeek-V4-Pro (Apr 2026, event anchor).** Confirmed as a real model via
 its own arXiv technical report (arXiv:2606.19348) and DeepSeek's own docs —
 not a hallucinated post-cutoff entry. Price confirmed via a same-day
-archived pricing snapshot. MMLU: the tech report reports MMLU-Pro (recorded
+archived pricing snapshot; re-checked this snapshot for the same
+promotional-pricing pattern found on DeepSeek-V3's launch page (see
+"Decisions made") — no discount/promotional language present, DeepSeek's
+2026 pricing page is USD-denominated directly with a single standing rate,
+so no adjustment needed here. MMLU: the tech report reports MMLU-Pro (recorded
 as the secondary benchmark name), but a clean model-specific number for
 base "V4-Pro" (as opposed to a "V4-Pro-Max" high-reasoning-effort variant
 discussed in the same paper) could not be extracted — left blank rather
@@ -252,3 +279,63 @@ price or hunt for substitute models — the panel dropped from 17 to 15
 models as a result, still within the requested 15–25 range. Both are kept
 in this provenance doc, not the CSV, so nobody re-adds them later without
 knowing why.
+
+**3. MMLU eval-protocol heterogeneity — flagged as a Methods limitation,
+same category as benchmark saturation.** The committed MMLU column mixes
+evaluation protocols across rows: 5-shot (GPT-4, GPT-4o), 5-shot CoT
+(Claude 2, Claude 3.5 Sonnet), 0-shot English (o1), 5-shot with a 5-shot-CoT
+alternative shown in the same table (Claude 3 Opus: 86.8% 5-shot vs. 88.2%
+5-shot CoT — see Table 1 of its model card, a 1.4pp gap on the identical
+model from protocol choice alone), and "EM" with shot count simply not
+stated by the source (DeepSeek-V3, DeepSeek-R1, Llama 3.1 405B — all three
+drawn from the same DeepSeek-V3 paper Table 6 / DeepSeek-R1 paper Table 3).
+Coincidentally, the DeepSeek-table MMLU figure for Llama 3.1 405B (88.6)
+matches Meta's own 5-shot-CoT number exactly rather than Meta's plain
+5-shot number (87.3, a further 1.3pp gap) — suggestive that DeepSeek's
+internal eval uses CoT-style generation even where not labeled, but not
+confirmed. This is the same underlying problem that killed the GPQA
+crosswalk (protocol/measurement differences swamping small true
+capability differences at the frontier) and needs the same honesty in
+Methods: report the source and stated protocol per row (already in the
+`benchmark_source_type` column), and note explicitly that cross-row MMLU
+comparisons at the top of the range (86–92%) carry at least ~1–2pp of
+protocol-driven noise on top of whatever true capability gap exists,
+before any claim about relative capability ordering between adjacent rows.
+
+**4. DeepSeek-V3's promotional pricing sat right before the R1 event —
+resolved.** Checked whether this recurs elsewhere in the panel before
+deciding: DeepSeek-R1's price was already confirmed non-promotional (the
+source page says so explicitly); re-checked DeepSeek-V4-Pro's archived
+snapshot for the same pattern and found no discount language there either
+— its 2026 pricing page is a single standing USD rate. So the promotional
+period is specific to V3's Dec 2024 launch, not a recurring panel-wide
+issue. Decision, per Jeff's stated lean: **exclude promotional pricing
+entirely** — DeepSeek-V3's row now uses the standard/list price ($0.27/M
+input cache-miss, $1.10/M output) instead of the launch-day discount
+($0.14/$0.28). This is the simpler, more defensible choice and it means no
+month between Dec 2024 and Feb 2025 needs a "contaminated by promo" flag in
+any pre-period average feeding the R1 event's C1 — there's nothing to
+flag. Both the promotional and standard figures are stated directly in USD
+on the same already-cited archived page (no currency conversion was ever
+needed for this row).
+
+**5. Llama 3.1 405B is the first open-weight model in the panel — open
+policy question, not resolved here.** Every other row so far is a
+lab-served proprietary API with exactly one official price. Llama has no
+such thing: Meta doesn't sell inference, so "the price" is really "a
+price," set independently by each of several competing inference
+providers (Together AI, Fireworks, Groq, and others), which can differ
+from each other and often use a single blended input+output rate rather
+than a lab's typical input/output split (confirmed for Together AI here;
+not confirmed either way for the others). This row used Together AI's
+rate somewhat arbitrarily — it was the first provider checked with a
+usable same-week archived snapshot, not because it's canonically "the"
+Llama 3.1 405B price. As more open-weight models enter the panel (Qwen,
+future Llama/DeepSeek-weights releases, etc.), this needs a standing rule
+Jeff should set: e.g. always use a specific named provider when available
+(consistency, but that provider may not serve every model), use the
+cheapest/median/first-available provider price (more "market price"-like,
+but less consistent methodology), or treat open-weight rows as a distinct
+sub-panel with their own documented convention rather than forcing them
+into the same schema as lab-served rows. Not decided — flagging now before
+more of these accumulate.
